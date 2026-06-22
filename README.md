@@ -10,8 +10,8 @@ En este repositorio se incluyen scripts relacionados con:
 
 * Lectura y preparación de registros ECG.
 * Preprocesado y filtrado de la señal.
-* Detección y corrección de picos R.
 * Control de calidad de la señal y detección de artefactos.
+* Detección y corrección de picos R.
 * Segmentación de ventanas en ritmo sinusal y fibrilación auricular.
 * Cancelación QRST para obtener el residual auricular.
 * Cálculo de biomarcadores temporales, morfológicos y espectrales.
