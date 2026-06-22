@@ -135,30 +135,30 @@ Una posible organización del repositorio es:
 Una posible organización del repositorio, siguiendo el orden general del análisis realizado en el TFG, es:
 
 ```text
-TFG-biomarcadores-fibrilacion-auricular/
+TFG-biomarcadores-fibrilación-auricular/
 │
 ├── README.md
 │
 ├── scripts/
 │   ├── 01_preprocesado/
-│   ├── 02_calidad_senal/
-│   ├── 03_deteccion_R/
-│   ├── 04_segmentacion_ventanas/
-│   ├── 05_cancelacion_QRST/
-│   ├── 06_calculo_biomarcadores/
+│   ├── 02_calidad_señal/
+│   ├── 03_detección_R/
+│   ├── 04_segmentación_ventanas/
+│   ├── 05_cancelación_QRST/
+│   ├── 06_cálculo_biomarcadores/
 │   ├── 07_tablas_maestras/
-│   ├── 08_analisis_estadistico/
-│   ├── 09_seleccion_biomarcadores/
+│   ├── 08_análisis_estadístico/
+│   ├── 09_selección_biomarcadores/
 │   ├── 10_umap/
-│   └── 11_visualizacion_figuras/
+│   └── 11_visualización_figuras/
 │
 ├── resultados/
 │   ├── tablas/
-│   ├── estadistica/
+│   ├── estadística/
 │   ├── umap/
 │   └── figuras/
 │
-└── documentacion/
+└── documentación/
 ```
 
 ## Nota
