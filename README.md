@@ -130,24 +130,32 @@ Para ejecutar los scripts pueden ser necesarias las siguientes herramientas:
 
 Una posible organización del repositorio es:
 
+## Organización recomendada
+
+Una posible organización del repositorio, siguiendo el orden general del análisis realizado en el TFG, es:
+
 ```text
 TFG-biomarcadores-fibrilacion-auricular/
 │
 ├── README.md
+│
 ├── scripts/
-│   ├── preprocesado/
-│   ├── deteccion_R/
-│   ├── calidad_senal/
-│   ├── segmentacion/
-│   ├── cancelacion_QRST/
-│   ├── biomarcadores/
-│   ├── estadistica/
-│   ├── seleccion_biomarcadores/
-│   ├── umap/
-│   └── visualizacion/
+│   ├── 01_preprocesado/
+│   ├── 02_calidad_senal/
+│   ├── 03_deteccion_R/
+│   ├── 04_segmentacion_ventanas/
+│   ├── 05_cancelacion_QRST/
+│   ├── 06_calculo_biomarcadores/
+│   ├── 07_tablas_maestras/
+│   ├── 08_analisis_estadistico/
+│   ├── 09_seleccion_biomarcadores/
+│   ├── 10_umap/
+│   └── 11_visualizacion_figuras/
 │
 ├── resultados/
 │   ├── tablas/
+│   ├── estadistica/
+│   ├── umap/
 │   └── figuras/
 │
 └── documentacion/
