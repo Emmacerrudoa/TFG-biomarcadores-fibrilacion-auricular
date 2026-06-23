@@ -24,9 +24,9 @@ En este repositorio se incluyen scripts relacionados con:
 
 Para el desarrollo del trabajo se han utilizado registros ECG disponibles en PhysioNet:
 
-* **MIT-BIH Normal Sinus Rhythm Database (NSRDB)**.
-* **MIT-BIH Atrial Fibrillation Database (AFDB)**.
-* **Long-Term AF Database (LTAFDB)**.
+* **MIT-BIH Normal Sinus Rhythm Database (NSRDB)** (`BASE_3_SANOS`).
+* **MIT-BIH Atrial Fibrillation Database (AFDB)** (`BASE_2`).
+* **Long-Term AF Database (LTAFDB)** (`BASE_1`).
 
 Los datos originales no están incluidos en este repositorio. Para ejecutar el código es necesario descargar previamente las bases de datos desde PhysioNet y adaptar las rutas correspondientes en los scripts.
 
