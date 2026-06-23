@@ -1,24 +1,25 @@
 function [locs_R_final, motivo] = DetectarPICOSR(x, locs_R_anot, Fs)
 
-% Obtiene la posición final de los picos R mediante un método híbrido
-% conservador basado en anotaciones y detección automática auxiliar.
+% COMBINAR_R_HIBRIDO_CONSERVADOR
+%
+% Método híbrido conservador para obtener picos R.
 %
 % Estrategia:
 %   1) Usa las anotaciones como base principal.
 %   2) Ajusta las anotaciones al pico real del QRS.
 %   3) Limpia posibles falsos R procedentes de las anotaciones.
-%   4) Ejecuta un detector automático auxiliar.
-%   5) Añade detecciones automáticas únicamente si rellenan huecos largos
-%      y generan intervalos RR fisiológicos.
+%   4) Ejecuta detector automático auxiliar.
+%   5) Añade detecciones automáticas solo si rellenan huecos largos
+%      y generan RR fisiológicos.
 %
 % Entrada:
-%   x            -> señal ECG filtrada
-%   locs_R_anot  -> picos R anotados en coordenadas locales
-%   Fs           -> frecuencia de muestreo
+%   x          -> señal ECG filtrada
+%   locs_R_anot -> picos R anotados en coordenadas locales
+%   Fs         -> frecuencia de muestreo
 %
 % Salida:
 %   locs_R_final -> picos R finales
-%   motivo       -> mensaje informativo si se produce algún descarte o aviso
+%   motivo       -> mensaje informativo si algo falla
 
 motivo = '';
 locs_R_final = [];
@@ -43,9 +44,9 @@ if ~isempty(locs_R_anot)
     locs_R_base = limpiar_locs_local(locs_R_base, N);
     locs_R_base = fusionar_locs_cercanos_local(locs_R_base, Fs, 0.12);
 
-    % Las anotaciones se utilizan como base principal, pero se revisan
-    % para eliminar posibles falsos R que generen patrones RR sospechosos
-    % o tengan baja amplitud QRS respecto a sus vecinos.
+    % Las anotaciones .qrs se usan como base, pero no se aceptan directamente.
+    % Se eliminan posibles falsos R que generan patrones RR sospechosos
+    % y presentan amplitud QRS baja respecto a sus vecinos.
     locs_R_base = limpiar_R_anotados_falsos(x, locs_R_base, Fs);
     locs_R_base = limpiar_locs_local(locs_R_base, N);
     locs_R_base = fusionar_locs_cercanos_local(locs_R_base, Fs, 0.12);
@@ -58,7 +59,7 @@ end
 
 %% 3) Detectar R automáticamente como apoyo
 
-[locs_R_det, ~, motivo_det] = detectar_3R(x, Fs);
+[locs_R_det, ~, motivo_det] = detectar_R(x, Fs);
 
 locs_R_det = limpiar_locs_local(locs_R_det, N);
 
@@ -99,8 +100,8 @@ tol_cerca = round(0.18 * Fs);
 RR_min = 0.30;
 RR_max = 1.50;
 
-% Umbral mínimo para considerar que existe un hueco largo entre dos R.
-% Un valor mayor hace el método más conservador frente a falsos positivos.
+% Hueco mínimo entre dos R anotados para considerar la inclusión
+% de una detección automática intermedia.
 RR_gap_min = 0.90;
 
 for i = 1:numel(locs_R_det)
@@ -175,7 +176,7 @@ locs_R_final = ajustar_R_al_pico(x, locs_R_final, Fs);
 locs_R_final = limpiar_locs_local(locs_R_final, N);
 locs_R_final = fusionar_locs_cercanos_local(locs_R_final, Fs, 0.12);
 
-% Limpieza final para eliminar posibles falsos R restantes tras el ajuste.
+% Limpieza final por si tras el ajuste queda algún falso R
 locs_R_final = limpiar_R_anotados_falsos(x, locs_R_final, Fs);
 locs_R_final = limpiar_locs_local(locs_R_final, N);
 locs_R_final = fusionar_locs_cercanos_local(locs_R_final, Fs, 0.12);
@@ -205,13 +206,12 @@ function locs_out = limpiar_R_anotados_falsos(x, locs_R, Fs)
 
 % LIMPIAR_R_ANOTADOS_FALSOS
 %
-% Elimina posibles falsos R procedentes de las anotaciones o de la lista
-% final de picos R.
+% Elimina falsos R procedentes de anotaciones o lista final.
 %
 % Criterios:
 %   1) Si hay dos R demasiado cercanos, conserva el de mayor amplitud.
-%   2) Si un R central genera un patrón corto-largo o largo-corto y es
-%      débil respecto a sus vecinos, se elimina.
+%   2) Si un R central genera patrón corto-largo/largo-corto y es débil,
+%      se elimina.
 %   3) Si un R tiene amplitud QRS muy baja respecto a la mediana global,
 %      se elimina.
 
@@ -228,8 +228,8 @@ end
 
 RR_min = 0.30;
 
-% Umbral relativo de amplitud QRS respecto a la mediana global.
-% Valores mayores hacen la limpieza más estricta.
+% Umbral relativo para descartar picos con amplitud QRS baja
+% respecto a la amplitud global de la ventana.
 factor_amp_global = 0.40;
 
 cambios = true;
@@ -336,7 +336,7 @@ while cambios
 
     if ~isempty(idx_bajos)
 
-        % Se elimina primero el pico con menor amplitud.
+        % Eliminar el más pequeño primero
         [~, jmin] = min(amp_R(idx_bajos));
         eliminar_idx = idx_bajos(jmin);
 
@@ -363,7 +363,7 @@ if isempty(x) || ~isfinite(R) || R < 1 || R > N
 end
 
 vent_qrs  = round(0.04 * Fs);  % 40 ms alrededor del R
-vent_base = round(0.12 * Fs);  % 120 ms para estimar la línea local
+vent_base = round(0.12 * Fs);  % 120 ms para estimar línea local
 
 ini_qrs = max(1, R - vent_qrs);
 fin_qrs = min(N, R + vent_qrs);
@@ -385,7 +385,7 @@ amp = max(abs(seg_qrs - baseline), [], 'omitnan');
 
 end
 
-function [locs_R, pks_R, motivo] = detectar_3R(x, Fs)
+function [locs_R, pks_R, motivo] = detectar_R(x, Fs)
 
 x = x(:);
 motivo = '';
@@ -507,7 +507,7 @@ end
 
 %% ============================================================
 % FUNCIÓN LOCAL: AJUSTAR PICOS R AL PICO REAL DEL QRS
-% Versión adaptativa según la polaridad dominante del QRS.
+% Versión adaptativa según polaridad dominante del QRS
 % ============================================================
 
 function locs_R_aj = ajustar_R_al_pico(x, locs_R, Fs)
@@ -547,7 +547,7 @@ for i = 1:numel(locs_R)
         continue
     end
 
-    % Se busca el punto de mayor amplitud absoluta para estimar la polaridad.
+    % Buscar el punto de mayor amplitud absoluta solo para estimar polaridad
     [~, idx_abs] = max(abs(segmento));
 
     amps_qrs(i) = segmento(idx_abs);
@@ -581,10 +581,10 @@ for i = 1:numel(locs_R)
     end
 
     if polaridad >= 0
-        % QRS predominantemente positivo: ajuste al máximo positivo.
+        % QRS predominantemente positivo: ajustar al máximo positivo
         [~, idx_local] = max(segmento);
     else
-        % QRS predominantemente negativo: ajuste al mínimo negativo.
+        % QRS predominantemente negativo: ajustar al mínimo negativo
         [~, idx_local] = min(segmento);
     end
 
