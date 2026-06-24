@@ -29,7 +29,7 @@ rng(42)
 %% RUTA DE LA TABLA MAESTRA
 
 archivo_tabla = ...
-    'C:\Users\Emma\Documents\MATLAB\RESULTADOS_ESTADISTICOS_TFG\tabla_maestra_biomarcadores_TFGnfft.xlsx';
+    'C:\Users\Emma\Documents\MATLAB\RESULTADOS_ESTADISTICOS_TFG\tabla_maestra_biomarcadores_TFG.xlsx';
 
 carpeta_salida = fileparts(archivo_tabla);
 
