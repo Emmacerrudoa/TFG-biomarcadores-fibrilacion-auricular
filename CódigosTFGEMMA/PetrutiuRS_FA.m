@@ -1192,11 +1192,14 @@ function [segmento, ok] = extraer_ventana_relativa_fin(x, Fs, t_ini_rel, t_fin_r
 
 % Extrae una ventana definida respecto al final de x.
 %
-% Ejemplo:
-%   t_ini_rel = -12
-%   t_fin_rel = -10
+% En este script, x corresponde a los 180 s previos al inicio de la FA,
+% por lo que el final de x coincide con t_ini_FA.
 %
-% Devuelve el segmento situado entre -12 y -10 s antes del final.
+% Ejemplo:
+%   t_ini_rel = -180
+%   t_fin_rel = -175
+%
+% Devuelve el segmento situado entre 180 y 175 s antes del inicio de la FA.
 
 segmento = [];
 ok = false;
