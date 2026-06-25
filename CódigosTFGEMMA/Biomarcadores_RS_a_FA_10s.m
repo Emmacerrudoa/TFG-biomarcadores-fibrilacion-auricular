@@ -129,7 +129,7 @@ for bb = 1:numel(bases)
             x = resample(x,Fs_new,round(Fs_original));
             Fs = Fs_new;
 
-            %% 2) FILTRADO Y DETECCION DE ARTEFACTOS
+            %% 2) FILTRADO INICIAL
             % Se aplica el mismo criterio de filtrado y deteccion de
             % artefactos utilizado durante el preprocesamiento.
             % Las funciones auxiliares necesarias deben estar disponibles
@@ -141,7 +141,7 @@ for bb = 1:numel(bases)
 
             dur_artefacto = 2;
 
-            %% 4.5) DETECCION DE ARTEFACTOS EN VENTANAS DE 2 s
+            %% 3) DETECCION DE ARTEFACTOS EN VENTANAS DE 2 s
 
             N_art = dur_artefacto * Fs;
             num_vent_art = floor(length(x_filt)/N_art);
@@ -170,7 +170,7 @@ for bb = 1:numel(bases)
             labels = zeros(num_vent_art,1);
             % 0 buena, 1 desconexion, 2 transicion, 3 artefacto
 
-            %% 4.6) DETECTAR DESCONEXION
+            %% 3.1) DETECTAR DESCONEXION
 
             ref_ptp_all = median(ptp_vals);
             ref_rms_all = median(rms_vals);
@@ -181,7 +181,7 @@ for bb = 1:numel(bases)
             idx_disc = find(ptp_vals < low_ptp | rms_vals < low_rms);
             labels(idx_disc) = 1;
 
-            %% 4.7) REFERENCIAS DE SENAL NORMAL
+            %% 3.2) REFERENCIAS DE SENAL NORMAL
 
             idx_ok_ref = find(labels == 0);
 
@@ -201,7 +201,7 @@ for bb = 1:numel(bases)
 
             high_der_ok = 2.5 * ref_der;
 
-            %% 4.8) DETECTAR TRANSICION DESPUES DE DESCONEXION
+            %% 3.3) DETECTAR TRANSICION DESPUES DE DESCONEXION
 
             k = 1;
 
@@ -260,7 +260,7 @@ for bb = 1:numel(bases)
                 end
             end
 
-            %% 4.9) DETECTAR ARTEFACTO TIPO PULSOS / AMPLITUD EXTREMA
+            %% 3.4) DETECTAR ARTEFACTO TIPO PULSOS / AMPLITUD EXTREMA
 
             idx_no_disc_trans = find(labels == 0);
 
@@ -287,7 +287,7 @@ for bb = 1:numel(bases)
             idx_art = find(labels == 0 & frac_extreme_vals > high_frac);
             labels(idx_art) = 3;
 
-            %% 4.9.1) RELLENAR HUECOS BUENOS CORTOS ENTRE BLOQUES MALOS
+            %% 3.5) RELLENAR HUECOS BUENOS CORTOS ENTRE BLOQUES MALOS
 
             bad = labels ~= 0;
             max_hueco_bueno = 4; % 4 ventanas = 8 s
@@ -317,7 +317,7 @@ for bb = 1:numel(bases)
                 end
             end
 
-            %% 4.10) CONVERTIR VENTANAS MALAS DE 2 s EN INTERVALOS MALOS
+            %% 3.6) CONVERTIR VENTANAS MALAS DE 2 s EN INTERVALOS MALOS
 
             intervalos_malos = [];
 
@@ -331,14 +331,14 @@ for bb = 1:numel(bases)
 
             intervalos_malos = unir_intervalos(intervalos_malos);
 
-            %% 3) SENAL PARA EL ANALISIS EN RS
+            %% 4) SENAL PARA EL ANALISIS EN RS
             % Se utiliza la misma senal filtrada entre 0.5 y 40 Hz.
             % Dentro del calculo de DF y ondas P/T se aplica 0.5-20 Hz,
             % igual que en los analisis de RS del TFG.
 
             x_RS = x_filt;
 
-            %% 4) ANOTACIONES DE RITMO
+            %% 5) ANOTACIONES DE RITMO
 
             [ann_ritmo,comments] = ...
                 leer_anotaciones_wfdb_python(ruta_registro,'atr');
@@ -381,7 +381,7 @@ for bb = 1:numel(bases)
             [tiempos_ritmo,orden] = sort(tiempos_ritmo);
             ritmos = ritmos(orden);
 
-            %% 4.1) UNIFICAR ANOTACIONES CONSECUTIVAS DEL MISMO RITMO
+            %% 5.1) UNIFICAR ANOTACIONES CONSECUTIVAS DEL MISMO RITMO
             %
             % Si aparecen varias anotaciones consecutivas que representan
             % el mismo ritmo, se consideran parte de un unico episodio.
@@ -456,7 +456,7 @@ for bb = 1:numel(bases)
                 continue
             end
 
-            %% 5) ANOTACIONES QRS
+            %% 6) ANOTACIONES QRS
 
             ann_qrs = leer_anotaciones_muestra_wfdb_python( ...
                 ruta_registro,'qrs');
@@ -475,7 +475,7 @@ for bb = 1:numel(bases)
                 continue
             end
 
-            %% 6) BUSCAR TRANSICIONES RS -> FA
+            %% 7) BUSCAR TRANSICIONES RS -> FA
 
             n_validas_registro = 0;
 
@@ -512,7 +512,7 @@ for bb = 1:numel(bases)
                     continue
                 end
 
-                %% COMPROBAR ARTEFACTOS SOLO EN LAS TRES VENTANAS ANALIZADAS
+                %% 8) COMPROBAR ARTEFACTOS SOLO EN LAS TRES VENTANAS ANALIZADAS
                 %
                 % No se exige que los 180 s completos esten limpios.
                 % Solo se descarta la transicion si existe un artefacto en:
@@ -564,7 +564,7 @@ for bb = 1:numel(bases)
                     continue
                 end
 
-                %% R HIBRIDOS EN EL BLOQUE COMPLETO DE 180 s
+                %% 9) R HIBRIDOS EN EL BLOQUE COMPLETO DE 180 s
 
                 idx_qrs = locs_qrs_global >= ini180 & ...
                           locs_qrs_global <= fin180;
@@ -591,7 +591,7 @@ for bb = 1:numel(bases)
                     continue
                 end
 
-                %% FILTRADO ESPECIFICO DE RS SOBRE LOS 180 s
+                %% 10) FILTRADO ESPECIFICO DE RS SOBRE LOS 180 s
 
                 [bRS,aRS] = butter(2,[0.5 20]/(Fs/2),'bandpass');
                 ecg180_RS = filtfilt(bRS,aRS,ecg180(:));
@@ -603,7 +603,7 @@ for bb = 1:numel(bases)
                     continue
                 end
 
-                %% CANCELACION QRST SOBRE LOS 180 s COMPLETOS
+                %% 11) CANCELACION QRST SOBRE LOS 180 s COMPLETOS
 
                 residual180 = cancelar_QRST_plantilla_medianaRS( ...
                     ecg180_RS,R180,Fs);
@@ -624,7 +624,7 @@ for bb = 1:numel(bases)
                     continue
                 end
 
-                %% 7) TRES VENTANAS DE 10 s
+                %% 12) TRES VENTANAS DE 10 s
 
                 resultados_esta_transicion = cell(n_momentos,1);
                 transicion_completa = true;
