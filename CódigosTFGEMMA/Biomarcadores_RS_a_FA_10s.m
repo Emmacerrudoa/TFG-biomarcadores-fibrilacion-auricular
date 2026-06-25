@@ -81,7 +81,7 @@ min_RR_validos = 5;
 min_ondas_10s = 6;
 max_porcentaje_RR_fuera = 10;
 
-% Igual que en el TFG: se excluye porque concentra demasiadas transiciones.
+% Se excluye porque concentra demasiadas transiciones.
 registros_excluir = {'112'};
 
 filas_resultados = {};
